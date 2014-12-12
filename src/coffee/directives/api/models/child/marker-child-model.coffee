@@ -26,7 +26,9 @@ angular.module('uiGmapgoogle-maps.directives.api.models.child')
         @clonedModel = _.clone @model,true
         @deferred = uiGmapPromise.defer()
         _.each @keys, (v, k) =>
-          @[k + 'Key'] = if _.isFunction @keys[k] then @keys[k]() else @keys[k]
+          keyValue = @keys[k]
+          if keyValue? and not _.isFunction(keyValue)  and _.isString(keyValue)
+            @[k + 'Key'] = keyValue
         @idKey = @idKeyKey or 'id'
         @id = @model[@idKey] if @model[@idKey]?
 
@@ -185,9 +187,9 @@ angular.module('uiGmapgoogle-maps.directives.api.models.child')
         if @gMarker and (@gMarker.getMap() or @gMarkerManager.type != MarkerManager.type)
           @deferred.resolve @gMarker
         else
-          @deferred.reject 'gMarker is null' unless @gMarker
+          return @deferred.reject 'gMarker is null' unless @gMarker
           unless @gMarker?.getMap() and @gMarkerManager.type == MarkerManager.type
-            $log.warn 'gMarker has no map yet'
+            $log.debug 'gMarker has no map yet'
             @deferred.resolve @gMarker
 
         if @model[@fitKey]
